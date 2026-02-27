@@ -1,0 +1,262 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.3fr);
+  gap: var(--space-3);
+}
+
+.formCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.formHeaderTitle {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  margin: 0;
+}
+
+.formHeaderSub {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.formRow {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.formRowItem {
+  flex: 1;
+}
+
+.analyzeActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-1);
+}
+
+.resultsColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.resultsCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.resultsHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.resultsTitle {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.scorePill {
+  min-width: 72px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: var(--border-width) solid var(--border-color);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.scoreValue {
+  font-weight: 600;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sectionTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.tagGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: var(--border-width) solid var(--border-color);
+  font-size: 0.8rem;
+  background-color: rgba(17, 17, 17, 0.02);
+}
+
+.categoryRow {
+  margin-bottom: 4px;
+}
+
+.categoryLabel {
+  font-size: 0.8rem;
+  font-weight: 500;
+  opacity: 0.8;
+  margin-right: 6px;
+}
+
+.roundList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.roundBlockTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0 0 2px;
+}
+
+.bulletList {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.87rem;
+}
+
+.bulletList li {
+  margin-bottom: 2px;
+}
+
+.planGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.planDay {
+  border-radius: var(--radius);
+  border: var(--border-width) solid var(--border-color);
+  padding: 8px 10px;
+}
+
+.planDayLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.planDayFocus {
+  margin: 2px 0 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.planDayDetails {
+  margin: 0;
+  font-size: 0.8rem;
+  opacity: 0.9;
+}
+
+.questionsList {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.87rem;
+}
+
+.questionsList li {
+  margin-bottom: 4px;
+}
+
+.historyCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.historyHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.historyTitle {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.historyList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.historyItemButton {
+  width: 100%;
+  text-align: left;
+  padding: 6px 8px;
+  border-radius: var(--radius);
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.historyItemButton:hover {
+  background-color: rgba(17, 17, 17, 0.04);
+}
+
+.historyItemMain {
+  display: flex;
+  flex-direction: column;
+}
+
+.historyCompanyRole {
+  font-size: 0.87rem;
+  font-weight: 500;
+}
+
+.historyMeta {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.historyScore {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.emptyState {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+@media (max-width: 960px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
