@@ -1,0 +1,241 @@
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  padding: 0;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Overall Readiness */
+.readinessCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+}
+
+.readinessCircleWrap {
+  position: relative;
+  width: 160px;
+  height: 160px;
+}
+
+.readinessSvg {
+  transform: rotate(-90deg);
+  width: 100%;
+  height: 100%;
+}
+
+.readinessBg {
+  fill: none;
+  stroke: var(--border-color);
+  stroke-width: 10;
+}
+
+.readinessProgress {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 10;
+  stroke-linecap: round;
+  stroke-dasharray: 0 452;
+  animation: readinessFill 0.8s ease-out forwards;
+}
+
+@keyframes readinessFill {
+  to {
+    stroke-dasharray: var(--readiness-dash) 452;
+  }
+}
+
+.readinessCenter {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.readinessScore {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--color-text);
+}
+
+.readinessLabel {
+  font-size: 0.875rem;
+  color: var(--color-text);
+  opacity: 0.75;
+  margin-top: 2px;
+}
+
+/* Skill Breakdown */
+.skillCard {
+  min-height: 280px;
+}
+
+.radarWrap {
+  width: 100%;
+  height: 260px;
+  margin-top: var(--space-2);
+}
+
+/* Continue Practice */
+.continueCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.continueTopic {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--color-text);
+}
+
+.continueProgressWrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.875rem;
+  color: var(--color-text);
+  opacity: 0.85;
+}
+
+.continueProgressBar {
+  flex: 1;
+  height: 8px;
+  background: var(--border-color);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.continueProgressFill {
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.continueActions {
+  margin-top: var(--space-1);
+}
+
+/* Weekly Goals */
+.goalsCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.goalsSummary {
+  font-size: 0.9375rem;
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.goalsProgressBar {
+  height: 10px;
+  background: var(--border-color);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.goalsProgressFill {
+  height: 100%;
+  background: var(--color-accent);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.daysRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1);
+}
+
+.dayLabel {
+  font-size: 0.7rem;
+  color: var(--color-text);
+  opacity: 0.7;
+  text-align: center;
+  min-width: 28px;
+}
+
+.dayCircle {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--border-color);
+  flex-shrink: 0;
+}
+
+.dayCircle.filled {
+  background: var(--color-accent);
+}
+
+.dayCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Upcoming Assessments */
+.assessmentsCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  grid-column: 1 / -1;
+}
+
+.assessmentsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.assessmentItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.assessmentItem:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.assessmentItem:first-child {
+  padding-top: 0;
+}
+
+.assessmentTitle {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--color-text);
+}
+
+.assessmentTime {
+  font-size: 0.8125rem;
+  color: var(--color-text);
+  opacity: 0.7;
+}
+
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 var(--space-2);
+}
