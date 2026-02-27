@@ -1,0 +1,33 @@
+.footer {
+  padding: var(--space-2) var(--space-4);
+  border-top: var(--border-width) solid var(--border-color);
+  background-color: var(--color-bg);
+}
+
+.checklist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 0.9375rem;
+  color: var(--color-text);
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox {
+  width: 1.125rem;
+  height: 1.125rem;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+.label {
+  opacity: 0.9;
+}

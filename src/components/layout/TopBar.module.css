@@ -1,0 +1,47 @@
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-4);
+  border-bottom: var(--border-width) solid var(--border-color);
+  background-color: var(--color-bg);
+}
+
+.left {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--color-text);
+}
+
+.center {
+  font-size: 0.9375rem;
+  color: var(--color-text);
+  opacity: 0.85;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: var(--space-1) var(--space-2);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+.badge[data-status="In Progress"] {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.badge[data-status="Shipped"] {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}

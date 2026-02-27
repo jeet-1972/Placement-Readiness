@@ -1,0 +1,22 @@
+.contextHeader {
+  padding: var(--space-4) var(--space-4) var(--space-3);
+}
+
+.headline {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  margin: 0 0 var(--space-1) 0;
+  color: var(--color-text);
+}
+
+.subtext {
+  font-size: var(--text-body-size);
+  line-height: var(--text-body-line);
+  color: var(--color-text);
+  opacity: 0.85;
+  margin: 0;
+  max-width: var(--text-body-max-width);
+}

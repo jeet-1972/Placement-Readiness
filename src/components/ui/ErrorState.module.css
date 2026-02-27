@@ -1,0 +1,28 @@
+.wrapper {
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--color-accent);
+  border-radius: var(--radius);
+  background-color: var(--color-bg);
+}
+
+.title {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--color-text);
+  margin: 0 0 var(--space-1) 0;
+}
+
+.description {
+  font-size: var(--text-body-size);
+  line-height: var(--text-body-line);
+  color: var(--color-text);
+  opacity: 0.9;
+  margin: 0 0 var(--space-1) 0;
+}
+
+.remedy {
+  font-size: 0.9375rem;
+  line-height: var(--text-body-line);
+  color: var(--color-success);
+  margin: 0;
+}

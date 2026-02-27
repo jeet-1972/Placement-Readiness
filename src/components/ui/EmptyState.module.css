@@ -1,0 +1,19 @@
+.wrapper {
+  padding: var(--space-4);
+  text-align: center;
+}
+
+.message {
+  font-size: var(--text-body-size);
+  line-height: var(--text-body-line);
+  color: var(--color-text);
+  opacity: 0.85;
+  margin: 0 0 var(--space-2) 0;
+  max-width: var(--text-body-max-width);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.action {
+  margin-top: var(--space-2);
+}
