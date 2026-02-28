@@ -11,6 +11,8 @@ import { PracticePage } from "./components/pages/PracticePage";
 import { AssessmentsPage } from "./components/pages/AssessmentsPage";
 import { ResourcesPage } from "./components/pages/ResourcesPage";
 import { ProfilePage } from "./components/pages/ProfilePage";
+import { PrpTestChecklistPage } from "./components/pages/prp/PrpTestChecklistPage";
+import { PrpShipPage } from "./components/pages/prp/PrpShipPage";
 
 function App() {
   return (
@@ -76,6 +78,62 @@ function App() {
         <Route path="resources" element={<ResourcesPage />} />
         <Route path="profile" element={<ProfilePage />} />
       </Route>
+
+      <Route
+        path="/prp/07-test"
+        element={
+          <PageLayout
+            topBar={
+              <TopBar
+                projectName="KodNest Premium Build System"
+                currentStep={7}
+                totalSteps={8}
+                status="In Progress"
+              />
+            }
+            contextHeader={
+              <ContextHeader
+                headline="PRP Test Checklist"
+                subtext="Mark off the built-in tests. Shipping is locked until all are passed."
+              />
+            }
+            primaryWorkspace={
+              <PrimaryWorkspace>
+                <PrpTestChecklistPage />
+              </PrimaryWorkspace>
+            }
+            proofFooter={<ProofFooter />}
+          />
+        }
+      />
+
+      <Route
+        path="/prp/08-ship"
+        element={
+          <PageLayout
+            topBar={
+              <TopBar
+                projectName="KodNest Premium Build System"
+                currentStep={8}
+                totalSteps={8}
+                status="In Progress"
+              />
+            }
+            contextHeader={
+              <ContextHeader
+                headline="Ship Gate"
+                subtext="This step unlocks only after all built-in tests are checked."
+              />
+            }
+            primaryWorkspace={
+              <PrimaryWorkspace>
+                <PrpShipPage />
+              </PrimaryWorkspace>
+            }
+            proofFooter={<ProofFooter />}
+          />
+        }
+      />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
