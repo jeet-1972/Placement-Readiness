@@ -6,7 +6,12 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { analyzeJD, type AnalysisEntry } from "./analysisEngine";
+import {
+  analyzeJD,
+  type AnalysisEntry,
+  type SkillConfidence,
+  withDefaultConfidence,
+} from "./analysisEngine";
 
 interface AnalysisContextValue {
   latestEntry: AnalysisEntry | null;
@@ -17,6 +22,11 @@ interface AnalysisContextValue {
     jdText: string;
   }) => AnalysisEntry;
   selectFromHistory: (id: string) => void;
+  updateSkillConfidence: (
+    entryId: string,
+    skill: string,
+    state: SkillConfidence,
+  ) => void;
   clearHistory: () => void;
 }
 
@@ -33,7 +43,7 @@ function readHistoryFromStorage(): AnalysisEntry[] {
     if (!raw) return [];
     const parsed = JSON.parse(raw) as AnalysisEntry[];
     if (!Array.isArray(parsed)) return [];
-    return parsed;
+    return parsed.map((entry) => withDefaultConfidence(entry));
   } catch {
     return [];
   }
@@ -74,6 +84,33 @@ export function AnalysisProvider({ children }: { children: ReactNode }) {
         setLatestEntry((prev) => {
           const found = history.find((entry) => entry.id === id);
           return found ?? prev;
+        });
+      },
+      updateSkillConfidence: (entryId, skill, state) => {
+        setHistory((prev) =>
+          prev.map((entry) => {
+            if (entry.id !== entryId) return entry;
+            const updated: AnalysisEntry = {
+              ...entry,
+              skillConfidenceMap: {
+                ...(entry.skillConfidenceMap ?? {}),
+                [skill]: state,
+              },
+            };
+            return withDefaultConfidence(updated);
+          }),
+        );
+
+        setLatestEntry((prev) => {
+          if (!prev || prev.id !== entryId) return prev;
+          const updated: AnalysisEntry = {
+            ...prev,
+            skillConfidenceMap: {
+              ...(prev.skillConfidenceMap ?? {}),
+              [skill]: state,
+            },
+          };
+          return withDefaultConfidence(updated);
         });
       },
       clearHistory: () => {

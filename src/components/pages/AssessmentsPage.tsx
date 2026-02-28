@@ -4,11 +4,21 @@ import { Input } from "../ui/Input";
 import { Textarea } from "../ui/Textarea";
 import { Button } from "../ui/Button";
 import { useAnalysis } from "../../analysis/AnalysisContext";
-import { type ChecklistRound, type SevenDayPlan } from "../../analysis/analysisEngine";
+import {
+  type ChecklistRound,
+  type SevenDayPlan,
+  type SkillCategoryId,
+} from "../../analysis/analysisEngine";
 import styles from "./AssessmentsPage.module.css";
 
 export function AssessmentsPage() {
-  const { analyze, latestEntry, history, selectFromHistory } = useAnalysis();
+  const {
+    analyze,
+    latestEntry,
+    history,
+    selectFromHistory,
+    updateSkillConfidence,
+  } = useAnalysis();
   const [company, setCompany] = useState("");
   const [role, setRole] = useState("");
   const [jdText, setJdText] = useState("");
@@ -35,7 +45,7 @@ export function AssessmentsPage() {
       );
     }
 
-    const { extractedSkills } = latestEntry;
+    const { extractedSkills, skillConfidenceMap } = latestEntry;
 
     if (!extractedSkills.hasAny && extractedSkills.fallbackLabel) {
       return (
@@ -51,17 +61,43 @@ export function AssessmentsPage() {
     return (
       <div className={styles.section}>
         <p className={styles.sectionTitle}>Key skills extracted</p>
-        {(Object.keys(extractedSkills.byCategory) as (keyof typeof extractedSkills.byCategory)[])
+        {(Object.keys(
+          extractedSkills.byCategory,
+        ) as SkillCategoryId[])
           .filter((cat) => extractedSkills.byCategory[cat].length > 0)
           .map((cat) => (
             <div key={cat} className={styles.categoryRow}>
               <span className={styles.categoryLabel}>{cat}</span>
               <span className={styles.tagGroup}>
-                {extractedSkills.byCategory[cat].map((skill) => (
-                  <span key={skill} className={styles.tag}>
-                    {skill}
-                  </span>
-                ))}
+                {extractedSkills.byCategory[cat].map((skill) => {
+                  const current =
+                    (skillConfidenceMap && skillConfidenceMap[skill]) ??
+                    "practice";
+                  const isKnow = current === "know";
+                  return (
+                    <button
+                      key={skill}
+                      type="button"
+                      className={`${styles.tagButton} ${
+                        isKnow
+                          ? styles.tagButtonKnow
+                          : styles.tagButtonPractice
+                      }`.trim()}
+                      onClick={() =>
+                        updateSkillConfidence(
+                          latestEntry.id,
+                          skill,
+                          isKnow ? "practice" : "know",
+                        )
+                      }
+                    >
+                      <span className={styles.tagSkillLabel}>{skill}</span>
+                      <span className={styles.tagStateLabel}>
+                        {isKnow ? "I know this" : "Need practice"}
+                      </span>
+                    </button>
+                  );
+                })}
               </span>
             </div>
           ))}
@@ -122,6 +158,152 @@ export function AssessmentsPage() {
     );
   };
 
+  const buildPlanText = () => {
+    if (!latestEntry) return "";
+    return latestEntry.plan
+      .map(
+        (day) =>
+          `${day.dayLabel} — ${day.focus}\n${day.details}`.trimEnd(),
+      )
+      .join("\n\n");
+  };
+
+  const buildChecklistText = () => {
+    if (!latestEntry) return "";
+    const lines: string[] = [];
+    latestEntry.checklist.forEach((round) => {
+      lines.push(round.title);
+      round.items.forEach((item) => {
+        lines.push(`- ${item}`);
+      });
+      lines.push("");
+    });
+    return lines.join("\n").trimEnd();
+  };
+
+  const buildQuestionsText = () => {
+    if (!latestEntry) return "";
+    return latestEntry.questions
+      .map((q, index) => `${index + 1}. ${q}`)
+      .join("\n");
+  };
+
+  const buildFullExportText = () => {
+    if (!latestEntry) return "";
+    const headerLines = [
+      "Placement Readiness Analysis",
+      latestEntry.company || latestEntry.role
+        ? `${latestEntry.company || "Company"} — ${
+            latestEntry.role || "Role"
+          }`
+        : "",
+      `Score: ${latestEntry.readinessScore}/100`,
+      "",
+    ].filter(Boolean);
+
+    const sections = [
+      ...headerLines,
+      "7-day plan",
+      buildPlanText(),
+      "",
+      "Round-wise checklist",
+      buildChecklistText(),
+      "",
+      "Likely questions",
+      buildQuestionsText(),
+    ];
+
+    return sections.join("\n").trimEnd();
+  };
+
+  const copyToClipboard = async (text: string) => {
+    if (!text) return;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+      }
+    } catch {
+      // Swallow clipboard errors; UI stays calm.
+    }
+  };
+
+  const handleCopyPlan = () => {
+    void copyToClipboard(buildPlanText());
+  };
+
+  const handleCopyChecklist = () => {
+    void copyToClipboard(buildChecklistText());
+  };
+
+  const handleCopyQuestions = () => {
+    void copyToClipboard(buildQuestionsText());
+  };
+
+  const handleDownloadTxt = () => {
+    const text = buildFullExportText();
+    if (!text) return;
+    try {
+      const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const baseName =
+        latestEntry?.company || latestEntry?.role || "placement-readiness";
+      link.href = url;
+      link.download = `${baseName.replace(/\s+/g, "-").toLowerCase()}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch {
+      // Ignore download errors.
+    }
+  };
+
+  const renderActionNext = () => {
+    if (!latestEntry) return null;
+    const skills = latestEntry.extractedSkills.allSkills;
+    if (skills.length === 0) {
+      return (
+        <div className={styles.actionBox}>
+          <p className={styles.actionTitle}>Action next</p>
+          <p className={styles.actionSuggestion}>
+            Start Day 1 plan now and keep notes on any topics that feel slow or fuzzy.
+          </p>
+        </div>
+      );
+    }
+    const map = latestEntry.skillConfidenceMap ?? {};
+    const weakSkills = skills.filter(
+      (skill) => (map[skill] ?? "practice") === "practice",
+    );
+    const topWeak = weakSkills.slice(0, 3);
+
+    return (
+      <div className={styles.actionBox}>
+        <p className={styles.actionTitle}>Action next</p>
+        {topWeak.length > 0 ? (
+          <>
+            <div className={styles.actionWeakSkills}>
+              {topWeak.map((skill) => (
+                <span key={skill} className={styles.tag}>
+                  {skill}
+                </span>
+              ))}
+            </div>
+            <p className={styles.actionSuggestion}>
+              Focus these in your next session. Start Day 1 plan now.
+            </p>
+          </>
+        ) : (
+          <p className={styles.actionSuggestion}>
+            You have marked all skills as confident. Start Day 1 plan now and keep a light revision
+            loop.
+          </p>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className={styles.page}>
       <div className={styles.layout}>
@@ -178,12 +360,50 @@ export function AssessmentsPage() {
               </div>
             </div>
 
+            {latestEntry && (
+              <div className={styles.exportRow}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className={styles.exportButton}
+                  onClick={handleCopyPlan}
+                >
+                  Copy 7-day plan
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className={styles.exportButton}
+                  onClick={handleCopyChecklist}
+                >
+                  Copy round checklist
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className={styles.exportButton}
+                  onClick={handleCopyQuestions}
+                >
+                  Copy 10 questions
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className={styles.exportButton}
+                  onClick={handleDownloadTxt}
+                >
+                  Download as TXT
+                </Button>
+              </div>
+            )}
+
             {latestEntry ? (
               <>
                 {renderSkillsSection()}
                 {renderRounds(latestEntry.checklist)}
                 {renderPlan(latestEntry.plan)}
                 {renderQuestions(latestEntry.questions)}
+                {renderActionNext()}
               </>
             ) : (
               <p className={styles.emptyState}>

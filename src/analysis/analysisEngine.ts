@@ -30,6 +30,8 @@ export interface DayPlan {
 
 export type SevenDayPlan = DayPlan[];
 
+export type SkillConfidence = "know" | "practice";
+
 export interface AnalysisEntry {
   id: string;
   createdAt: string;
@@ -40,7 +42,18 @@ export interface AnalysisEntry {
   plan: SevenDayPlan;
   checklist: ChecklistRound[];
   questions: string[];
+  /**
+   * Score shown to the user; derived from baseReadinessScore plus per-skill confidence.
+   */
   readinessScore: number;
+  /**
+   * Original score from JD heuristics, before self-assessment adjustments.
+   */
+  baseReadinessScore?: number;
+  /**
+   * User-marked confidence for each detected skill.
+   */
+  skillConfidenceMap?: Record<string, SkillConfidence>;
 }
 
 export interface AnalyzeInput {
@@ -490,6 +503,22 @@ function generateId(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+function applyConfidenceToScore(
+  baseScore: number,
+  skills: string[],
+  confidenceMap: Record<string, SkillConfidence>,
+): number {
+  let result = baseScore;
+  for (const skill of skills) {
+    const choice = confidenceMap[skill] ?? "practice";
+    if (choice === "know") result += 2;
+    else result -= 2;
+  }
+  if (result > 100) return 100;
+  if (result < 0) return 0;
+  return result;
+}
+
 export function analyzeJD(input: AnalyzeInput): AnalysisEntry {
   const company = input.company.trim();
   const role = input.role.trim();
@@ -506,7 +535,7 @@ export function analyzeJD(input: AnalyzeInput): AnalysisEntry {
     categoriesPresent: extractedSkills.presentCategories,
   });
 
-  return {
+  const baseEntry: AnalysisEntry = {
     id: generateId(),
     createdAt: new Date().toISOString(),
     company,
@@ -517,6 +546,41 @@ export function analyzeJD(input: AnalyzeInput): AnalysisEntry {
     checklist,
     questions,
     readinessScore,
+    baseReadinessScore: readinessScore,
+  };
+
+  return withDefaultConfidence(baseEntry);
+}
+
+/**
+ * Ensure an AnalysisEntry has a complete confidence map for all skills and an
+ * up-to-date readinessScore derived from baseReadinessScore.
+ *
+ * Used both when creating new entries and when upgrading entries loaded from storage.
+ */
+export function withDefaultConfidence(entry: AnalysisEntry): AnalysisEntry {
+  const allSkills = entry.extractedSkills.allSkills;
+  const base =
+    entry.baseReadinessScore === undefined
+      ? entry.readinessScore
+      : entry.baseReadinessScore;
+
+  const existingMap = entry.skillConfidenceMap ?? {};
+  const confidenceMap: Record<string, SkillConfidence> = { ...existingMap };
+
+  for (const skill of allSkills) {
+    if (!confidenceMap[skill]) {
+      confidenceMap[skill] = "practice";
+    }
+  }
+
+  const adjustedScore = applyConfidenceToScore(base, allSkills, confidenceMap);
+
+  return {
+    ...entry,
+    baseReadinessScore: base,
+    skillConfidenceMap: confidenceMap,
+    readinessScore: adjustedScore,
   };
 }
 
