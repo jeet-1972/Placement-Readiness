@@ -1,5 +1,4 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { TopBar } from "./components/layout/TopBar";
 import { ContextHeader } from "./components/layout/ContextHeader";
 import { PrimaryWorkspace } from "./components/layout/PrimaryWorkspace";
 import { ProofFooter } from "./components/layout/ProofFooter";
@@ -21,14 +20,6 @@ function App() {
         path="/"
         element={
           <PageLayout
-            topBar={
-              <TopBar
-                projectName="KodNest Premium Build System"
-                currentStep={0}
-                totalSteps={5}
-                status="In Progress"
-              />
-            }
             contextHeader={
               <ContextHeader
                 headline="Ace Your Placement"
@@ -49,14 +40,6 @@ function App() {
         path="/dashboard"
         element={
           <PageLayout
-            topBar={
-              <TopBar
-                projectName="KodNest Premium Build System"
-                currentStep={1}
-                totalSteps={5}
-                status="In Progress"
-              />
-            }
             contextHeader={
               <ContextHeader
                 headline="Placement Prep"
@@ -83,14 +66,6 @@ function App() {
         path="/prp/07-test"
         element={
           <PageLayout
-            topBar={
-              <TopBar
-                projectName="KodNest Premium Build System"
-                currentStep={7}
-                totalSteps={8}
-                status="In Progress"
-              />
-            }
             contextHeader={
               <ContextHeader
                 headline="PRP Test Checklist"
@@ -111,14 +86,6 @@ function App() {
         path="/prp/08-ship"
         element={
           <PageLayout
-            topBar={
-              <TopBar
-                projectName="KodNest Premium Build System"
-                currentStep={8}
-                totalSteps={8}
-                status="In Progress"
-              />
-            }
             contextHeader={
               <ContextHeader
                 headline="Ship Gate"
