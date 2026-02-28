@@ -6,6 +6,8 @@ import { Button } from "../ui/Button";
 import { useAnalysis } from "../../analysis/AnalysisContext";
 import {
   type ChecklistRound,
+  type CompanyIntel,
+  type RoundMapping,
   type SevenDayPlan,
   type SkillCategoryId,
 } from "../../analysis/analysisEngine";
@@ -18,11 +20,14 @@ export function AssessmentsPage() {
     history,
     selectFromHistory,
     updateSkillConfidence,
+    skippedCorruptedCount,
   } = useAnalysis();
   const [company, setCompany] = useState("");
   const [role, setRole] = useState("");
   const [jdText, setJdText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const jdTooShort = jdText.trim().length > 0 && jdText.trim().length < 200;
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -104,6 +109,46 @@ export function AssessmentsPage() {
       </div>
     );
   };
+
+  const renderCompanyIntel = (intel: CompanyIntel) => (
+    <div className={styles.section}>
+      <p className={styles.sectionTitle}>Company intel</p>
+      <div className={styles.intelCard}>
+        <h4 className={styles.intelTitle}>{intel.companyName}</h4>
+        <div className={styles.intelRow}>
+          <span className={styles.intelLabel}>Industry:</span>
+          <span className={styles.intelValue}>{intel.industry}</span>
+        </div>
+        <div className={styles.intelRow}>
+          <span className={styles.intelLabel}>Estimated size:</span>
+          <span className={styles.intelValue}>{intel.sizeLabel}</span>
+        </div>
+        <p className={styles.intelHiring}>
+          <strong>Typical hiring focus:</strong> {intel.typicalHiringFocus}
+        </p>
+        <p className={styles.demoNote}>
+          Demo Mode: Company intel generated heuristically.
+        </p>
+      </div>
+    </div>
+  );
+
+  const renderRoundMapping = (rounds: RoundMapping) => (
+    <div className={styles.section}>
+      <p className={styles.sectionTitle}>Expected round flow</p>
+      <div className={styles.roundTimeline}>
+        {rounds.map((round) => (
+          <div key={round.id} className={styles.roundTimelineItem}>
+            <div className={styles.roundDot} aria-hidden />
+            <div className={styles.roundTimelineContent}>
+              <p className={styles.roundTimelineTitle}>{round.title}</p>
+              <p className={styles.roundWhy}>{round.whyItMatters}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   const renderRounds = (rounds: ChecklistRound[]) => {
     if (rounds.length === 0) return null;
@@ -335,11 +380,17 @@ export function AssessmentsPage() {
               </div>
             </div>
             <Textarea
-              label="Job Description"
+              label="Job Description (required)"
               value={jdText}
               onChange={(e) => setJdText(e.target.value)}
               placeholder="Paste the full JD here. The platform detects stack, rounds, and likely questions without leaving your browser."
+              required
             />
+            {jdTooShort && (
+              <p className={styles.jdWarning} role="status">
+                This JD is too short to analyze deeply. Paste full JD for better output.
+              </p>
+            )}
             <div className={styles.analyzeActions}>
               <Button type="submit" disabled={!jdText.trim() || isSubmitting}>
                 {isSubmitting ? "Analyzing..." : "Analyze"}
@@ -399,6 +450,12 @@ export function AssessmentsPage() {
 
             {latestEntry ? (
               <>
+                {latestEntry.company.trim() && latestEntry.companyIntel
+                  ? renderCompanyIntel(latestEntry.companyIntel)
+                  : null}
+                {latestEntry.roundMapping && latestEntry.roundMapping.length > 0
+                  ? renderRoundMapping(latestEntry.roundMapping)
+                  : null}
                 {renderSkillsSection()}
                 {renderRounds(latestEntry.checklist)}
                 {renderPlan(latestEntry.plan)}
@@ -417,6 +474,13 @@ export function AssessmentsPage() {
             <div className={styles.historyHeaderRow}>
               <h3 className={styles.historyTitle}>History (this browser)</h3>
             </div>
+            {skippedCorruptedCount > 0 && (
+              <p className={styles.corruptedNotice} role="alert">
+                {skippedCorruptedCount === 1
+                  ? "One saved entry couldn't be loaded. Create a new analysis."
+                  : "Some saved entries couldn't be loaded. Create a new analysis."}
+              </p>
+            )}
             {history.length === 0 ? (
               <p className={styles.emptyState}>
                 Analyses you run will be stored locally so you can revisit them later – even after a

@@ -5,7 +5,6 @@ interface PageLayoutProps {
   topBar: ReactNode;
   contextHeader: ReactNode;
   primaryWorkspace: ReactNode;
-  secondaryPanel: ReactNode;
   proofFooter: ReactNode;
 }
 
@@ -13,7 +12,6 @@ export function PageLayout({
   topBar,
   contextHeader,
   primaryWorkspace,
-  secondaryPanel,
   proofFooter,
 }: PageLayoutProps) {
   return (
@@ -22,7 +20,6 @@ export function PageLayout({
       {contextHeader}
       <div className={styles.content}>
         {primaryWorkspace}
-        {secondaryPanel}
       </div>
       {proofFooter}
     </div>

@@ -8,14 +8,18 @@ import {
 } from "react";
 import {
   analyzeJD,
+  ensureCompanyIntelAndRoundMapping,
   type AnalysisEntry,
   type SkillConfidence,
   withDefaultConfidence,
 } from "./analysisEngine";
+import { fromStrictEntry, toStrictEntry } from "./analysisSchema";
 
 interface AnalysisContextValue {
   latestEntry: AnalysisEntry | null;
   history: AnalysisEntry[];
+  /** Number of entries skipped due to corruption when loading from storage. */
+  skippedCorruptedCount: number;
   analyze: (input: {
     company: string;
     role: string;
@@ -34,37 +38,90 @@ const AnalysisContext = createContext<AnalysisContextValue | undefined>(
   undefined,
 );
 
-const STORAGE_KEY = "placement-readiness-history-v1";
+const STORAGE_KEY = "placement-readiness-history-v2";
+const STORAGE_KEY_V1 = "placement-readiness-history-v1";
 
-function readHistoryFromStorage(): AnalysisEntry[] {
-  if (typeof window === "undefined") return [];
+function readHistoryFromStorage(): {
+  entries: AnalysisEntry[];
+  skippedCorruptedCount: number;
+} {
+  if (typeof window === "undefined") return { entries: [], skippedCorruptedCount: 0 };
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as AnalysisEntry[];
-    if (!Array.isArray(parsed)) return [];
-    return parsed.map((entry) => withDefaultConfidence(entry));
+    let raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      const v1Raw = window.localStorage.getItem(STORAGE_KEY_V1);
+      if (v1Raw) {
+        try {
+          const v1Parsed = JSON.parse(v1Raw) as unknown[];
+          if (Array.isArray(v1Parsed) && v1Parsed.length > 0) {
+            const migrated: AnalysisEntry[] = [];
+            for (const item of v1Parsed) {
+              try {
+                const entry = item as AnalysisEntry;
+                if (entry?.id && typeof entry.jdText === "string") {
+                  migrated.push(
+                    ensureCompanyIntelAndRoundMapping(withDefaultConfidence(entry)),
+                  );
+                }
+              } catch {
+                // skip corrupted v1 entry
+              }
+            }
+            if (migrated.length > 0) {
+              try {
+                const strict = migrated.map(toStrictEntry);
+                window.localStorage.setItem(STORAGE_KEY, JSON.stringify(strict));
+                window.localStorage.removeItem(STORAGE_KEY_V1);
+              } catch {
+                // ignore write failure
+              }
+            }
+            return { entries: migrated, skippedCorruptedCount: 0 };
+          }
+        } catch {
+          // ignore v1 parse failure
+        }
+      }
+      return { entries: [], skippedCorruptedCount: 0 };
+    }
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return { entries: [], skippedCorruptedCount: 0 };
+    let skipped = 0;
+    const entries: AnalysisEntry[] = [];
+    for (const item of parsed) {
+      const entry = fromStrictEntry(item);
+      if (entry == null) {
+        skipped += 1;
+        continue;
+      }
+      entries.push(
+        ensureCompanyIntelAndRoundMapping(withDefaultConfidence(entry)),
+      );
+    }
+    return { entries, skippedCorruptedCount: skipped };
   } catch {
-    return [];
+    return { entries: [], skippedCorruptedCount: 0 };
   }
 }
 
 function writeHistoryToStorage(history: AnalysisEntry[]) {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+    const strict = history.map(toStrictEntry);
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(strict));
   } catch {
     // Ignore storage errors (e.g., quota exceeded or disabled storage)
   }
 }
 
+const initial = readHistoryFromStorage();
+
 export function AnalysisProvider({ children }: { children: ReactNode }) {
-  const [history, setHistory] = useState<AnalysisEntry[]>(() =>
-    readHistoryFromStorage(),
-  );
+  const [history, setHistory] = useState<AnalysisEntry[]>(() => initial.entries);
   const [latestEntry, setLatestEntry] = useState<AnalysisEntry | null>(() =>
-    history.length > 0 ? history[0] : null,
+    initial.entries.length > 0 ? initial.entries[0] : null,
   );
+  const [skippedCorruptedCount] = useState<number>(() => initial.skippedCorruptedCount);
 
   useEffect(() => {
     writeHistoryToStorage(history);
@@ -74,6 +131,7 @@ export function AnalysisProvider({ children }: { children: ReactNode }) {
     () => ({
       latestEntry,
       history,
+      skippedCorruptedCount,
       analyze: ({ company, role, jdText }) => {
         const entry = analyzeJD({ company, role, jdText });
         setHistory((prev) => [entry, ...prev]);
@@ -87,6 +145,7 @@ export function AnalysisProvider({ children }: { children: ReactNode }) {
         });
       },
       updateSkillConfidence: (entryId, skill, state) => {
+        const now = new Date().toISOString();
         setHistory((prev) =>
           prev.map((entry) => {
             if (entry.id !== entryId) return entry;
@@ -96,6 +155,7 @@ export function AnalysisProvider({ children }: { children: ReactNode }) {
                 ...(entry.skillConfidenceMap ?? {}),
                 [skill]: state,
               },
+              updatedAt: now,
             };
             return withDefaultConfidence(updated);
           }),
@@ -109,6 +169,7 @@ export function AnalysisProvider({ children }: { children: ReactNode }) {
               ...(prev.skillConfidenceMap ?? {}),
               [skill]: state,
             },
+            updatedAt: now,
           };
           return withDefaultConfidence(updated);
         });
@@ -118,7 +179,7 @@ export function AnalysisProvider({ children }: { children: ReactNode }) {
         setLatestEntry(null);
       },
     }),
-    [history, latestEntry],
+    [history, latestEntry, skippedCorruptedCount],
   );
 
   return (

@@ -1,6 +1,5 @@
 .workspace {
   flex: 1;
   min-width: 0;
-  width: 70%;
   padding: var(--space-3) var(--space-4);
 }

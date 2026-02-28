@@ -2,7 +2,6 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { TopBar } from "./components/layout/TopBar";
 import { ContextHeader } from "./components/layout/ContextHeader";
 import { PrimaryWorkspace } from "./components/layout/PrimaryWorkspace";
-import { SecondaryPanel } from "./components/layout/SecondaryPanel";
 import { ProofFooter } from "./components/layout/ProofFooter";
 import { PageLayout } from "./components/layout/PageLayout";
 import { LandingPage } from "./components/pages/LandingPage";
@@ -39,12 +38,6 @@ function App() {
                 <LandingPage />
               </PrimaryWorkspace>
             }
-            secondaryPanel={
-              <SecondaryPanel
-                stepExplanation="Use this workspace to understand how KodNest structures your placement preparation journey."
-                promptText="Describe your current placement target and preferred tech stack."
-              />
-            }
             proofFooter={<ProofFooter />}
           />
         }
@@ -72,12 +65,6 @@ function App() {
               <PrimaryWorkspace>
                 <DashboardLayout />
               </PrimaryWorkspace>
-            }
-            secondaryPanel={
-              <SecondaryPanel
-                stepExplanation="Navigate the sections on the left to structure your preparation."
-                promptText="Outline the skills you want to strengthen before your next interview."
-              />
             }
             proofFooter={<ProofFooter />}
           />
